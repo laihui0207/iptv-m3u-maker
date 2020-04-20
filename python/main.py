@@ -3,6 +3,7 @@
 
 from flask import Flask, redirect, url_for, send_from_directory
 import threading
+import os
 
 import iptv
 
@@ -16,7 +17,7 @@ class Main (object):
 
     def site (self):
         web = Flask(__name__)
-        resourcePath = '/srv/iptv/http'
+        resourcePath = os.getcwd()+'/../http'
 
         @web.route('/')
         def index():

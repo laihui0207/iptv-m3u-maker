@@ -15,33 +15,34 @@ import os
 
 socket.setdefaulttimeout(5.0)
 
-class Tools (object) :
 
-    def __init__ (self) :
+class Tools(object):
+
+    def __init__(self):
         pass
 
-    def getPage (self, url, requestHeader = [], postData = {}) :
+    def getPage(self, url, requestHeader=[], postData={}):
         fakeIp = self.fakeIp()
         requestHeader.append('CLIENT-IP:' + fakeIp)
         requestHeader.append('X-FORWARDED-FOR:' + fakeIp)
 
-        if postData == {} :
+        if postData == {}:
             request = urllib.request.Request(url)
-        elif isinstance(postData, str) :
+        elif isinstance(postData, str):
             request = urllib.request.Request(url, postData)
-        else :
+        else:
             request = urllib.request.Request(url, urllib.parse.urlencode(postData).encode('utf-8'))
 
-        for x in requestHeader :
+        for x in requestHeader:
             headerType = x.split(':')[0]
             headerCon = x.replace(headerType + ':', '')
             request.add_header(headerType, headerCon)
 
-        try :
+        try:
             ctx = ssl.create_default_context()
             ctx.check_hostname = False
             ctx.verify_mode = ssl.CERT_NONE
-            response = urllib.request.urlopen(request, context = ctx)
+            response = urllib.request.urlopen(request, context=ctx)
             header = response.headers
             body = response.read().decode('utf-8')
             code = response.code
@@ -62,26 +63,26 @@ class Tools (object) :
 
         return result
 
-    def getRealUrl (self, url, requestHeader = []) :
+    def getRealUrl(self, url, requestHeader=[]):
         fakeIp = self.fakeIp()
         requestHeader.append('CLIENT-IP:' + fakeIp)
         requestHeader.append('X-FORWARDED-FOR:' + fakeIp)
 
         request = urllib.request.Request(url)
 
-        for x in requestHeader :
+        for x in requestHeader:
             headerType = x.split(':')[0]
             headerCon = x.replace(headerType + ':', '')
             request.add_header(headerType, headerCon)
-        try :
+        try:
             response = urllib.request.urlopen(request)
             realUrl = response.geturl()
-        except :
+        except:
             realUrl = ""
-        
+
         return realUrl
 
-    def fakeIp (self) :
+    def fakeIp(self):
         fakeIpList = []
 
         for x in range(0, 4):
@@ -91,7 +92,7 @@ class Tools (object) :
 
         return fakeIp
 
-    def fmtCookie (self, string) :
+    def fmtCookie(self, string):
         result = re.sub(r"path\=\/.", "", string)
         result = re.sub(r"(\S*?)\=deleted.", "", result)
         result = re.sub(r"expires\=(.*?)GMT;", "", result)
@@ -101,20 +102,20 @@ class Tools (object) :
 
         return result
 
-    def urlencode(self, str) :
+    def urlencode(self, str):
         reprStr = repr(str).replace(r'\x', '%')
         return reprStr[1:-1]
 
-    def gzdecode(self, data) :
+    def gzdecode(self, data):
         try:
             compressedstream = io.StringIO(data)
-            gziper = gzip.GzipFile(fileobj = compressedstream)
+            gziper = gzip.GzipFile(fileobj=compressedstream)
             html = gziper.read()
             return html
-        except :
+        except:
             return data
 
-    def fmtTitle (self, string) :
+    def fmtTitle(self, string):
         pattern = re.compile(r"(cctv[-|\s]*\d*)?(.*)", re.I)
         tmp = pattern.findall(string)
         channelId = tmp[0][0].strip('-').strip()
@@ -128,36 +129,36 @@ class Tools (object) :
         pattern = re.compile(r"(fhd|hd|sd)", re.I)
         tmp = pattern.findall(channeTitle)
         quality = ''
-        if len(tmp) > 0 :
+        if len(tmp) > 0:
             quality = tmp[0]
             channeTitle = channeTitle.replace(tmp[0], '')
 
-        try :
+        try:
             channeTitle.index('高清')
             channeTitle = channeTitle.replace('高清', '')
             quality = 'hd'
-        except :
+        except:
             pass
 
-        try :
+        try:
             channeTitle.index('超清')
             channeTitle = channeTitle.replace('超清', '')
             quality = 'fhd'
-        except :
+        except:
             pass
 
         result = {
-            'id'     : channelId,
-            'title'  : channeTitle.strip('-').strip(),
+            'id': channelId,
+            'title': channeTitle.strip('-').strip(),
             'quality': quality.strip('-').strip(),
-            'level'  : 4,
+            'level': 4,
         }
 
         if result['id'] != '':
             pattern = re.compile(r"cctv[-|\s]*(\d*)", re.I)
             result['id'] = re.sub(pattern, "CCTV-\\1", result['id'])
 
-            if '+' in result['title'] :
+            if '+' in result['title']:
                 result['id'] = result['id'] + str('+')
 
         pattern = re.compile(r"\[\d+\*\d+\]", re.I)
@@ -169,16 +170,16 @@ class Tools (object) :
         # Radio
         pattern = re.compile(r"(radio|fm)", re.I)
         tmp = pattern.findall(result['title'])
-        if len(tmp) > 0 :
+        if len(tmp) > 0:
             result['level'] = 7
 
         return result
 
-    def chkPlayable (self, url) :
+    def chkPlayable(self, url):
         try:
             startTime = int(round(time.time() * 1000))
             code = urllib.request.urlopen(url).getcode()
-            if code == 200 :
+            if code == 200:
                 endTime = int(round(time.time() * 1000))
                 useTime = endTime - startTime
                 return int(useTime)
@@ -187,7 +188,7 @@ class Tools (object) :
         except:
             return 0
 
-    def chkCros (self, url) :
+    def chkCros(self, url):
         return 0
         # try:
         #     res = urllib.request.urlopen(url).getheader('Access-Control-Allow-Origin')
@@ -199,11 +200,11 @@ class Tools (object) :
         # except:
         #     return 0
 
-    def logger (self, txt, new = False) :
+    def logger(self, txt, new=False):
         filePath = os.path.join(os.path.dirname(os.path.abspath(__file__)).replace('python', 'http'), 'log.txt')
-        if new :
+        if new:
             typ = 'w'
-        else :
+        else:
             typ = 'a'
-        with open(filePath, typ) as f: 
+        with open(filePath, typ) as f:
             f.write(time.strftime("%Y/%m/%d %H:%M:%S", time.localtime()) + ": " + txt + "\r\n")
