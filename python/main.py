@@ -17,7 +17,7 @@ class Main (object):
 
     def site (self):
         web = Flask(__name__)
-        resourcePath = os.getcwd()+'/../http'
+        resourcePath = os.getcwd()+'/http'
 
         @web.route('/')
         def index():
